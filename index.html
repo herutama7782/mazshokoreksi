@@ -237,7 +237,7 @@
             document.getElementById("city-name").innerText = `Jadwal untuk kota: ${cityName}`;
         }
 
-        function adjustTime(originalTime, koreksi) {
+   	function adjustTime(originalTime, koreksi) {
             const [hours, minutes] = originalTime.split(":").map(Number);
             const newDate = new Date();
             newDate.setHours(hours, minutes + koreksi);
@@ -258,11 +258,39 @@
             return JSON.parse(localStorage.getItem("koreksiWaktu")) || {};
         }
 
-        function simpanJadwal() {
-            const notif = document.getElementById("notif");
-            notif.style.display = "block";
-            setTimeout(() => (notif.style.display = "none"), 3000);
-        }
+       function simpanJadwal() {
+    // Menyimpan data jadwal sholat dan koreksi waktu ke localStorage
+    const citySelect = document.getElementById("city-select");
+    const cityId = citySelect.value;
+    const cityName = citySelect.options[citySelect.selectedIndex].text;
+    
+    // Menyimpan jadwal sholat dan koreksi waktu
+    const koreksiWaktu = loadKoreksiWaktu(); // Mengambil koreksi waktu dari localStorage
+    const jadwalDenganKoreksi = Object.keys(jadwalSholat).reduce((result, waktu) => {
+        const originalTime = jadwalSholat[waktu];
+        const koreksi = koreksiWaktu[waktu] || 0;
+        const updatedTime = adjustTime(originalTime, koreksi);
+        result[waktu] = updatedTime;
+        return result;
+    }, {});
+
+    // Simpan jadwal dan kota yang dipilih
+    const savedData = {
+        cityId: cityId,
+        cityName: cityName,
+        jadwal: jadwalDenganKoreksi,
+        koreksiWaktu: koreksiWaktu
+    };
+
+    localStorage.setItem("savedData", JSON.stringify(savedData));
+
+    // Menampilkan notifikasi sukses
+    const notif = document.getElementById("notif");
+    notif.style.display = "block";
+    setTimeout(() => {
+        notif.style.display = "none";
+    }, 10000);
+}
 
         function resetJadwalSholat() {
             localStorage.removeItem("savedData");
